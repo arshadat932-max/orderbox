@@ -1,0 +1,38 @@
+create table public.orders (
+  id bigint generated always as identity primary key,
+  order_no text default (
+    'OB-' || nextval('public.order_number_seq')
+  ),
+  customer_name text not null,
+  phone text,
+  product_name text not null,
+  quantity integer not null default 1,
+  amount numeric(12,2) not null default 0,
+  source text default 'সরাসরি',
+  status text not null default 'পেন্ডিং',
+  address text,
+  created_at timestamptz not null default now()
+);
+
+create sequence if not exists public.order_number_seq;
+
+alter table public.orders enable row level security;
+
+create policy "Authenticated users can read orders"
+on public.orders for select to authenticated
+using (true);
+
+create policy "Authenticated users can add orders"
+on public.orders for insert to authenticated
+with check (true);
+
+create policy "Authenticated users can update orders"
+on public.orders for update to authenticated
+using (true) with check (true);
+
+create policy "Authenticated users can delete orders"
+on public.orders for delete to authenticated
+using (true);
+
+alter publication supabase_realtime
+add table public.orders;
